@@ -103,7 +103,7 @@ end
 =#
 
 function density_pressure(params,W_rho,particles::Vector{Particle{N,T}}) where {N,T}
-	Threads.@threads for pi in particles
+	#=Threads.@threads=# for pi in particles
 		pi.rho = zero(T)
 
 		for pj in particles
@@ -124,7 +124,7 @@ function forces!(params,W_spiky,particles::Vector{Particle{N,T}}) where {N,T}
     g = params.g
     mass = params.mass
 
-	Threads.@threads for pi in particles
+	#=Threads.@threads=# for pi in particles
 	    ∇pressure = @MArray zeros(T,N)
 	    fvisc = @MArray zeros(T,N)
 
