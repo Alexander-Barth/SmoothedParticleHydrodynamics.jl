@@ -66,54 +66,38 @@ function InitSPH()
     )
 end
 
-function step!(params,particles::Vector{Particle{N,T}}) where {N,T}
+function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
     Δt = params.Δt
 
-	#=Threads.@threads=# for p in particles
+	#=Threads.@threads=# @inbounds for p in particles
 		# forward Euler integration
 		p.v += Δt .* p.f ./ p.rho
 		p.x += Δt * p.v
 
+		# damping at boundary
         p.v = SVector(
             ntuple(Val(N)) do n
-                vn = p.v[n]
-		        if (p.x[n] < params.boundary_epsilon)
-			        vn *= params.boundary_damping
+                @inbounds begin
+                    vn = p.v[n]
+                    xn = p.x[n]
+		            if (xn < params.boundary_epsilon) ||
+                        (xn > params.limits[n] - params.boundary_epsilon)
+			            vn *= params.boundary_damping
+                    end
+                    return vn
                 end
-		        if (p.x[n] > params.limits[n] - params.boundary_epsilon)
-			        vn *= params.boundary_damping
-                end
-                return vn
             end)
 
+		# enforce boundary conditions
         p.x = SVector(
             ntuple(Val(N)) do n
-                xn = p.x[n]
-		        if (p.x[n] < params.boundary_epsilon)
-			        xn = params.boundary_epsilon
+                @inbounds begin
+                    clamp(p.x[n],
+                          params.boundary_epsilon,
+                          params.limits[n] - params.boundary_epsilon)
                 end
-		        if (p.x[n] > params.limits[n] - params.boundary_epsilon)
-			        xn = params.limits[n] - params.boundary_epsilon
-                end
-                return xn
             end)
 
-        #=
-        for n = 1:N
-		    # enforce boundary conditions
-		    if (p.x[n] < params.boundary_epsilon)
-                #@show n,p.x[n]
-			    p.v[n] *= params.boundary_damping
-			    p.x[n] = params.boundary_epsilon
-                #@show "new",n,p.x[n]
-            end
-
-		    if (p.x[n] > params.limits[n] - params.boundary_epsilon)
-			    p.v[n] *= params.boundary_damping
-			    p.x[n] = params.limits[n] - params.boundary_epsilon
-            end
-        end
-        =#
     end
 end
 
@@ -128,8 +112,8 @@ end
 end
 =#
 
-function density_pressure(params,W_rho,particles::Vector{Particle{N,T}}) where {N,T}
-	#=Threads.@threads=# for pi in particles
+function density_pressure(params,W_rho,particles::AbstractVector{Particle{N,T}}) where {N,T}
+	#=Threads.@threads=# @inbounds for pi in particles
 		pi.rho = zero(T)
 
 		for pj in particles
@@ -145,12 +129,12 @@ function density_pressure(params,W_rho,particles::Vector{Particle{N,T}}) where {
     end
 end
 
-function forces!(params,W_spiky,particles::Vector{Particle{N,T}}) where {N,T}
+function forces!(params,W_spiky,particles::AbstractVector{Particle{N,T}}) where {N,T}
     h = params.h
     g = params.g
     mass = params.mass
 
-	#=Threads.@threads=# for pi in particles
+	#=Threads.@threads=# @inbounds for pi in particles
 	    ∇pressure = @SArray zeros(T,N)
 	    fvisc = @SArray zeros(T,N)
 
