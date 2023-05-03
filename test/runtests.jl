@@ -1,6 +1,6 @@
 using Test
 using LinearAlgebra
-import SmoothedParticleHydrodynamics: InitSPH, forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W
+import SmoothedParticleHydrodynamics: InitSPH, forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W, Particle
 
 
 function numerical_integration(k::Kernel{N},dr) where N
