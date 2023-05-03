@@ -1,7 +1,7 @@
 
-function Particle(x::MVector{N,T}) where {N,T}
-    v = @MVector zeros(T,N)
-    f = @MVector zeros(T,N)
+function Particle(x::SVector{N,T}) where {N,T}
+    v = @SVector zeros(T,N)
+    f = @SVector zeros(T,N)
     return Particle(x,v,f,T(0),T(0))
 end
 
@@ -24,7 +24,7 @@ function case_dam_break(
                 break
             end
 
-            x = MVector{N}([ranges[j][i[j]]+rand(T)/100 for j in 1:N])
+            x = SVector{N}([ranges[j][i[j]]+rand(T)/100 for j in 1:N])
 			push!(particles,Particle(x))
         end
     end
@@ -71,9 +71,34 @@ function step!(params,particles::Vector{Particle{N,T}}) where {N,T}
 
 	#=Threads.@threads=# for p in particles
 		# forward Euler integration
-		p.v .+= Δt .* p.f ./ p.rho
-		p.x .+= Δt * p.v
+		p.v += Δt .* p.f ./ p.rho
+		p.x += Δt * p.v
 
+        p.v = SVector(
+            ntuple(Val(N)) do n
+                vn = p.v[n]
+		        if (p.x[n] < params.boundary_epsilon)
+			        vn *= params.boundary_damping
+                end
+		        if (p.x[n] > params.limits[n] - params.boundary_epsilon)
+			        vn *= params.boundary_damping
+                end
+                return vn
+            end)
+
+        p.x = SVector(
+            ntuple(Val(N)) do n
+                xn = p.x[n]
+		        if (p.x[n] < params.boundary_epsilon)
+			        xn = params.boundary_epsilon
+                end
+		        if (p.x[n] > params.limits[n] - params.boundary_epsilon)
+			        xn = params.limits[n] - params.boundary_epsilon
+                end
+                return xn
+            end)
+
+        #=
         for n = 1:N
 		    # enforce boundary conditions
 		    if (p.x[n] < params.boundary_epsilon)
@@ -88,6 +113,7 @@ function step!(params,particles::Vector{Particle{N,T}}) where {N,T}
 			    p.x[n] = params.limits[n] - params.boundary_epsilon
             end
         end
+        =#
     end
 end
 
@@ -125,8 +151,8 @@ function forces!(params,W_spiky,particles::Vector{Particle{N,T}}) where {N,T}
     mass = params.mass
 
 	#=Threads.@threads=# for pi in particles
-	    ∇pressure = @MArray zeros(T,N)
-	    fvisc = @MArray zeros(T,N)
+	    ∇pressure = @SArray zeros(T,N)
+	    fvisc = @SArray zeros(T,N)
 
 		for pj in particles
 			if pi == pj
@@ -140,15 +166,15 @@ function forces!(params,W_spiky,particles::Vector{Particle{N,T}}) where {N,T}
 				# compute pressure force contribution
                 # Particle-Based Fluid Simulation for Interactive Applications
                 # Matthias Müller, et al. 2003, Eq 10.
-				#∇pressure .+= -params.mass * (pi.p + pj.p) / (2 * pj.rho) * ∇W(W_spiky,rij,r)
-				∇pressure .+= - pi.rho * params.mass * (pi.p/pi.rho^2 + pj.p/pj.rho^2) * ∇W(W_spiky,rij,r)
+				#∇pressure += -params.mass * (pi.p + pj.p) / (2 * pj.rho) * ∇W(W_spiky,rij,r)
+				∇pressure += - pi.rho * params.mass * (pi.p/pi.rho^2 + pj.p/pj.rho^2) * ∇W(W_spiky,rij,r)
 
 				# compute viscosity force contribution
-				fvisc .+= params.viscosity * params.mass * (pj.v - pi.v) / pj.rho * params.viscosity_lap * (h - r)
+				fvisc += params.viscosity * params.mass * (pj.v - pi.v) / pj.rho * params.viscosity_lap * (h - r)
             end
         end
 		fgrav = g * mass / pi.rho
-		pi.f .= ∇pressure + fvisc + fgrav
+		pi.f = ∇pressure + fvisc + fgrav
     end
 end
 

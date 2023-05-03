@@ -16,9 +16,9 @@ struct KernelPoly6{N,T} <: Kernel{N} where T <: Number
 end
 
 mutable struct Particle{N,T}
-    x::MVector{N,T} # position
-    v::MVector{N,T} # velocity
-    f::MVector{N,T} # force
+    x::SVector{N,T} # position
+    v::SVector{N,T} # velocity
+    f::SVector{N,T} # force
     rho::T          # density
     p::T            # pressure
 end
