@@ -73,14 +73,14 @@ function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
 
 	#=Threads.@threads=# @inbounds for i in 1:length(particles)
         p = particles[i]
-		p.v += Δt .* p.f ./ p.rho
-		x = p.x + Δt * p.v
+		v = p.v + Δt * p.f ./ p.rho
+		x = p.x + Δt * v
 
 		# damping at boundary
-        p.v = SVector(
+        v = SVector(
             ntuple(Val(N)) do n
                 @inbounds begin
-                    vn = p.v[n]
+                    vn = v[n]
                     xn = x[n]
 		            if (xn < params.boundary_epsilon) ||
                         (xn > params.limits[n] - params.boundary_epsilon)
@@ -100,7 +100,7 @@ function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
                 end
             end)
 
-        particles[i] = Particle(x,p.v,p.f,p.rho,p.p)
+        particles[i] = Particle(x,v,p.f,p.rho,p.p)
     end
 end
 
@@ -116,19 +116,22 @@ end
 =#
 
 function density_pressure(params,W_rho,particles::AbstractVector{Particle{N,T}}) where {N,T}
-	#=Threads.@threads=# @inbounds for pi in particles
-		pi.rho = zero(T)
+	#=Threads.@threads=# @inbounds for i in 1:length(particles)
+        pi = particles[i]
+		rho = zero(T)
 
-		for pj in particles
+		for j in 1:length(particles)
+            pj = particles[j]
 			rij = pj.x - pi.x
 			r2 = norm(rij)^2
 
 			if r2 < params.h²
 				# this computation is symmetric
-				pi.rho += @fastmath params.mass * W(W_rho,r2)
+				rho += @fastmath params.mass * W(W_rho,r2)
             end
         end
-		pi.p = params.gas_const * (pi.rho - params.rest_density)
+		p = params.gas_const * (rho - params.rest_density)
+        particles[i] = Particle(pi.x,pi.v,pi.f,rho,p)
     end
 end
 
