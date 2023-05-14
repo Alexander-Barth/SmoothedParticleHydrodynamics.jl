@@ -2,6 +2,7 @@ import SmoothedParticleHydrodynamics: InitSPH, forces!, update!, surface_hypersp
 using StableRNGs
 using Test
 import SmoothedParticleHydrodynamics: InitSPH, forces!, update!
+using BenchmarkTools
 
 rng = StableRNG(123)
 params,particles,W_spiky,W_rho = InitSPH(rng = rng)
@@ -11,3 +12,8 @@ for n = 1:100
 end
 
 @test particles[200].x[1] == 274.05356f0
+
+# 3.433 ms
+# 3.432 ms
+# 3.441 ms
+#@btime update!(params,W_spiky,W_rho,particles)

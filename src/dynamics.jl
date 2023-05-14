@@ -71,17 +71,17 @@ end
 function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
     Δt = params.Δt
 
-	#=Threads.@threads=# @inbounds for p in particles
-		# forward Euler integration
+	#=Threads.@threads=# @inbounds for i in 1:length(particles)
+        p = particles[i]
 		p.v += Δt .* p.f ./ p.rho
-		p.x += Δt * p.v
+		x = p.x + Δt * p.v
 
 		# damping at boundary
         p.v = SVector(
             ntuple(Val(N)) do n
                 @inbounds begin
                     vn = p.v[n]
-                    xn = p.x[n]
+                    xn = x[n]
 		            if (xn < params.boundary_epsilon) ||
                         (xn > params.limits[n] - params.boundary_epsilon)
 			            vn *= params.boundary_damping
@@ -91,15 +91,16 @@ function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
             end)
 
 		# enforce boundary conditions
-        p.x = SVector(
+        x = SVector(
             ntuple(Val(N)) do n
                 @inbounds begin
-                    clamp(p.x[n],
+                    clamp(x[n],
                           params.boundary_epsilon,
                           params.limits[n] - params.boundary_epsilon)
                 end
             end)
 
+        particles[i] = Particle(x,p.v,p.f,p.rho,p.p)
     end
 end
 
