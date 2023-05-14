@@ -12,6 +12,7 @@ function case_dam_break(
     limits = nothing,
     g = nothing,
     Δt = nothing,
+    rng = Random.GLOBAL_RNG,
 )
 
     particles = Vector{Particle{N,T}}(undef,0)
@@ -24,7 +25,7 @@ function case_dam_break(
                 break
             end
 
-            x = SVector{N}([ranges[j][i[j]]+rand(T)/100 for j in 1:N])
+            x = SVector{N}([ranges[j][i[j]]+rand(rng,T)/100 for j in 1:N])
 			push!(particles,Particle(x))
         end
     end
@@ -54,15 +55,16 @@ function case_dam_break(
 end
 
 
-function InitSPH()
+function InitSPH(; rng = Random.GLOBAL_RNG)
     N = 2
     T = Float32
 
     case_dam_break(N,T;
-        h = 16,
-        limits = [1200,900],
-        g = [0, -10],
-        Δt = 0.0007,	   # integration timestep
+                   h = 16,
+                   limits = [1200,900],
+                   g = [0, -10],
+                   Δt = 0.0007,	   # integration timestep
+                   rng = rng,
     )
 end
 

@@ -39,3 +39,5 @@ for kernel in (KernelSpiky,KernelPoly6)
     end
 end
 
+
+include("test.jl")
