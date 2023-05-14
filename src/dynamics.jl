@@ -140,7 +140,9 @@ function forces!(params,W_spiky,particles::AbstractVector{Particle{N,T}}) where 
     g = params.g
     mass = params.mass
 
-	#=Threads.@threads=# @inbounds for pi in particles
+	#=Threads.@threads=# @inbounds for i in 1:length(particles)
+        pi = particles[i]
+
 	    ∇pressure = @SArray zeros(T,N)
 	    fvisc = @SArray zeros(T,N)
 
@@ -165,6 +167,7 @@ function forces!(params,W_spiky,particles::AbstractVector{Particle{N,T}}) where 
         end
 		fgrav = g * mass / pi.rho
 		pi.f = ∇pressure + fvisc + fgrav
+        particles[i] = Particle(pi.x,pi.v,pi.f,pi.rho,pi.p)
     end
 end
 
