@@ -11,7 +11,7 @@ for n = 1:100
     update!(params,W_spiky,W_rho,particles)
 end
 
-@test particles[200].x[1] == 274.05356f0
+@test particles[200].x[1] == 274.05756f0
 
 # 3.433 ms
 # 3.432 ms

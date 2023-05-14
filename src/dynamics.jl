@@ -44,7 +44,7 @@ function case_dam_break(
 
         # smoothing kernels defined in Müller and their gradients
         # adapted to 2D per "SPH Based Shallow Water Simulation" by Solenthaler et al.
-        viscosity_lap = 40.f0 / (π * h^5),
+        viscosity_lap = 40.f0 / (π * T(h)^5),
         limits = SVector{N}(T.(limits)),
         boundary_epsilon = T(boundary_epsilon), # boundary epsilon
         boundary_damping = -0.5f0,
@@ -146,11 +146,12 @@ function forces!(params,W_spiky,particles::AbstractVector{Particle{N,T}}) where 
 	    ∇pressure = @SArray zeros(T,N)
 	    fvisc = @SArray zeros(T,N)
 
-		for pj in particles
-			if pi == pj
+		for j in 1:length(particles)
+			if i == j
 				continue
             end
 
+            pj = particles[j]
 			rij = pj.x - pi.x
 			r = norm(rij)
 
@@ -166,8 +167,8 @@ function forces!(params,W_spiky,particles::AbstractVector{Particle{N,T}}) where 
             end
         end
 		fgrav = g * mass / pi.rho
-		pi.f = ∇pressure + fvisc + fgrav
-        particles[i] = Particle(pi.x,pi.v,pi.f,pi.rho,pi.p)
+		f = ∇pressure + fvisc + fgrav
+        particles[i] = Particle(pi.x,pi.v,f,pi.rho,pi.p)
     end
 end
 
