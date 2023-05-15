@@ -15,7 +15,7 @@ struct KernelPoly6{N,T} <: Kernel{N} where T <: Number
     coeff_grad::T
 end
 
-mutable struct Particle{N,T}
+struct Particle{N,T}
     x::SVector{N,T} # position
     v::SVector{N,T} # velocity
     f::SVector{N,T} # force

@@ -77,7 +77,7 @@ function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
 		x = p.x + Δt * v
 
 		# damping at boundary
-        v = SVector(
+        vc = SVector(
             ntuple(Val(N)) do n
                 @inbounds begin
                     vn = v[n]
@@ -91,7 +91,7 @@ function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
             end)
 
 		# enforce boundary conditions
-        x = SVector(
+        xc = SVector(
             ntuple(Val(N)) do n
                 @inbounds begin
                     clamp(x[n],
@@ -100,7 +100,7 @@ function step!(params,particles::AbstractVector{Particle{N,T}}) where {N,T}
                 end
             end)
 
-        particles[i] = Particle(x,v,p.f,p.rho,p.p)
+        particles[i] = Particle(xc,vc,p.f,p.rho,p.p)
     end
 end
 
