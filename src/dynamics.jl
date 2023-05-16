@@ -10,7 +10,7 @@ function case_dam_break(N,T; nparticles = 1219, kwargs...)
     case_dam_break2!(particles; kwargs...)
 end
 
-function case_dam_break2!(
+@inline function case_dam_break2!(
     particles::AbstractVector{<:Particle{N,T}};
     nparticles = 1219,
     h = 16.f0,
@@ -19,7 +19,6 @@ function case_dam_break2!(
     Δt = 0.0007,	   # integration timestep
     x_noise = 0.01,
     init_particles = true,
-# #
     rng = Random.GLOBAL_RNG,
 ) where {N,T}
 

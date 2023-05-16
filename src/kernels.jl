@@ -1,3 +1,5 @@
+# TODO
+#gamma(N) = 1 # 2D
 surface_hypersphere(N) = 2*π^(N/2) / gamma(N/2)
 
 
