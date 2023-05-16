@@ -1,15 +1,26 @@
 import SmoothedParticleHydrodynamics
-import SmoothedParticleHydrodynamics: InitSPH, forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W
+import SmoothedParticleHydrodynamics: forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W
 using StableRNGs
 using Test
-import SmoothedParticleHydrodynamics: InitSPH, forces!, update!
+import SmoothedParticleHydrodynamics: forces!, update!
 using BenchmarkTools
 
 rng = StableRNG(123)
-params,particles,W_spiky,W_rho = InitSPH(rng = rng)
+
+N = 2
+T = Float32
+
+config,particles,W_spiky,W_rho = SmoothedParticleHydrodynamics.case_dam_break(
+    N,T,
+    h = 16,
+    limits = (1200,900),
+    g = (0, -10),
+    Δt = 0.0007,
+    rng = rng)
+
 
 for n = 1:100
-    update!(params,W_spiky,W_rho,particles)
+    update!(config,W_spiky,W_rho,particles)
 end
 
 @test particles[200].x[1] == 274.05756f0
@@ -22,11 +33,11 @@ end
 # immutable struct
 # 2.675 ms
 # 2.672 ms
-#@btime update!(params,W_spiky,W_rho,particles)
+#@btime update!(config,W_spiky,W_rho,particles)
 
-@time update!(params,W_spiky,W_rho,particles)
+@time update!(config,W_spiky,W_rho,particles)
 
-@time SmoothedParticleHydrodynamics.density_pressure(params,W_rho,particles)
+@time SmoothedParticleHydrodynamics.density_pressure(config,W_rho,particles)
 
-@time SmoothedParticleHydrodynamics.forces!(params,W_spiky,particles)
-@time SmoothedParticleHydrodynamics.step!(params,particles)
+@time SmoothedParticleHydrodynamics.forces!(config,W_spiky,particles)
+@time SmoothedParticleHydrodynamics.step!(config,particles)

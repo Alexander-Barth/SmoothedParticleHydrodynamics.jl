@@ -12,10 +12,10 @@ surface_hypersphere(N) = 2*π^(N/2) / gamma(N/2)
 https://www.symbolab.com/solver/definite-integral-calculator/%5Cint_%7B0%7D%5E%7Bh%7D%5Cleft(h-%20r%5Cright)%5E%7B3%7D%20r%5E%7Bn-1%7Ddr%20?or=input
 
 """
-function KernelSpiky(N,h)
+function KernelSpiky(N,h::T) where T
     coeff = 1/((1/N - 3/(N+1) + 3/(N+2) - 1/(N+3)) * surface_hypersphere(N) * h^(N+3))
     coeff_grad = -3 * coeff
-    KernelSpiky{N,typeof(h)}(h,h^2,coeff,coeff_grad)
+    KernelSpiky{N,T}(h,h^2,coeff,coeff_grad)
 end
 
 @inline W(k::KernelSpiky,r2) = k.coeff * (k.h - sqrt(r2))^3
@@ -25,10 +25,10 @@ end
 
 
 #https://www.symbolab.com/solver/definite-integral-calculator/%5Cint_%7B0%7D%5E%7Bh%7D%5Cleft(h%5E%7B2%7D-%20r%5E%7B2%7D%5Cright)%5E%7B3%7D%20r%5E%7Bn-1%7Ddr%20?or=input
-function KernelPoly6(N,h)
+function KernelPoly6(N,h::T) where T
     coeff = 1/((1/N-3/(N+2)+3/(N+4)-1/(N+6)) * surface_hypersphere(N) * h^(N+6))
     coeff_grad = -6*coeff
-    KernelPoly6{N,typeof(h)}(h,h^2,coeff,coeff_grad)
+    KernelPoly6{N,T}(h,h^2,coeff,coeff_grad)
 end
 
 @inline W(k::KernelPoly6,r2) =  k.coeff * (k.h² - r2)^3
