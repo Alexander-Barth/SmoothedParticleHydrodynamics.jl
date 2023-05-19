@@ -95,8 +95,10 @@ function spatial_hash!(particles,h,limits,table,num_particles)
     return nothing
 end
 
+sz = unsafe_trunc.(Int,limits ./ h) .+ 1
 table = zeros(Int,prod(sz)+1)
 num_particles = zeros(Int,length(particles))
+limits = Tuple(limits)
 @time spatial_hash!(particles,h,limits,table,num_particles)
 @time spatial_hash!(particles,h,limits,table,num_particles)
 
