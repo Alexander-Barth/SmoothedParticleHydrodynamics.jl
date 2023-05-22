@@ -7,12 +7,11 @@ end
 
 function case_dam_break(N,T; nparticles = 1219, kwargs...)
     particles = Vector{Particle{N,T}}(undef,nparticles)
-    case_dam_break2!(particles; kwargs...)
+    case_dam_break!(particles; kwargs...)
 end
 
-@inline function case_dam_break2!(
+@inline function case_dam_break!(
     particles::AbstractVector{<:Particle{N,T}};
-    nparticles = 1219,
     h = 16.f0,
     limits = (1200,900),
     g = (0, -10),
