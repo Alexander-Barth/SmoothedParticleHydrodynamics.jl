@@ -30,7 +30,7 @@ end
         @inbounds for i in CartesianIndices(sz)
             x = (Tuple(i) .- 1) .* h .+ 2 * boundary_epsilon
             if x[1] < limits[1]/3
-    		    if (j > length(particles))
+    		    if (j >= length(particles))
                     break
                 end
 
@@ -41,7 +41,7 @@ end
                     end)
 
                 j += 1
-    		particles[j] = Particle(xp)
+    		    particles[j] = Particle(xp)
             end
         end
     end
