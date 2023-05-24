@@ -35,8 +35,10 @@ end
                 end
 
                 xp = SVector{N}(
-                    ntuple(Val(N)) do j
-                        @inbounds x[j] + rand(rng,T) * T(x_noise)
+                    ntuple(Val(N)) do n
+                        @inbounds clamp(x[n] + rand(rng,T) * T(x_noise),
+                          boundary_epsilon,
+                          limits[n] - boundary_epsilon)
                         #@inbounds x[j]
                     end)
 
