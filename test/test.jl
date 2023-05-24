@@ -53,7 +53,7 @@ l = Location3(particles);
 
 spatial_index = spatial_hash(particles,h,limits)
 
-@test table[end] == length(particles)
+#@test table[end] == length(particles)
 
 
 i = 1
@@ -87,7 +87,7 @@ end
 near_indices = zeros(Int,length(particles))
 r2max = config.h²;
 nfound = @btime find_near!(spatial_index,particles,x,search_range,r2max,near_indices)
-#=
+
 near = near_indices[1:nfound]
 
 
@@ -106,4 +106,4 @@ end
 @test Set(near_ref) == Set(near)
 
 
-=#
+

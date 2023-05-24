@@ -1,3 +1,4 @@
+using SpatialHashing: spatial_hash!, spatial_hash, each_near
 
 function Particle(x::SVector{N,T}) where {N,T}
     v = @SVector zeros(T,N)
@@ -12,7 +13,7 @@ end
 
 @inline function case_dam_break!(
     particles::AbstractVector{<:Particle{N,T}};
-    h = 16.f0,
+    h = T(16.f0),
     limits = (1200,900),
     g = (0, -10),
     Δt = 0.0007,	   # integration timestep
@@ -67,6 +68,7 @@ end
         limits = SVector{N}(T.(limits)),
         boundary_epsilon = T(boundary_epsilon), # boundary epsilon
         boundary_damping = -0.5f0,
+        search_range = 2,
     )
 
     W_spiky = KernelSpiky(N,T(h))
@@ -122,12 +124,14 @@ end
 end
 =#
 
-function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}}) where {N,T}
-	#=Threads.@threads=# @inbounds for i in 1:length(particles)
+function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}},spatial_index) where {N,T}
+    #=Threads.@threads=# @inbounds for i in 1:length(particles)
+
         pi = particles[i]
 		rho = zero(T)
 
-		for j in 1:length(particles)
+        @inline each_near(pi.x,10*config.search_range,spatial_index) do j
+		#for j in 1:length(particles)
             pj = particles[j]
 			rij = pj.x - pi.x
 			r2 = norm(rij)^2
@@ -142,7 +146,7 @@ function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}})
     end
 end
 
-function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}}) where {N,T}
+function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial_index) where {N,T}
     h = config.h
     g = config.g
     mass = config.mass
@@ -153,16 +157,13 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}}) where 
 	    ∇pressure = @SArray zeros(T,N)
 	    fvisc = @SArray zeros(T,N)
 
-		for j in 1:length(particles)
-			if i == j
-				continue
-            end
-
+        @inline each_near(pi.x,config.search_range,spatial_index) do j
+		#for j in 1:length(particles)
             pj = particles[j]
 			rij = pj.x - pi.x
 			r = norm(rij)
 
-			if (r < h)
+			if (r < h) &&  (i != j)
 				# compute pressure force contribution
                 # Particle-Based Fluid Simulation for Interactive Applications
                 # Matthias Müller, et al. 2003, Eq 10.
@@ -180,7 +181,17 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}}) where 
 end
 
 function update!(config,W_spiky,W_rho,particles)
-	density_pressure(config,W_rho,particles)
-	forces!(config,W_spiky,particles)
+    h = config.h
+    limits = config.limits
+    sz = unsafe_trunc.(Int,limits ./ h) .+ 1
+    table = zeros(Int,prod(sz)+1)
+    num_particles = zeros(Int,length(particles))
+    limits = Tuple(limits)
+    spatial_hash!(particles,h,limits,table,num_particles)
+
+    spatial_index = (; table, num_particles, h, sz)
+
+	density_pressure(config,W_rho,particles,spatial_index)
+	forces!(config,W_spiky,particles,spatial_index)
 	step!(config,particles)
 end
