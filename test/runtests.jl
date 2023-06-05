@@ -12,6 +12,7 @@ function numerical_integration(k::Kernel{N},dr) where N
     return integral
 end
 
+@testset "SmoothedParticleHydrodynamics" begin
 dr = 0.000001
 h = 2.
 
@@ -41,3 +42,4 @@ end
 
 
 include("test.jl")
+end

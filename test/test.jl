@@ -57,17 +57,17 @@ spatial_index = spatial_hash(particles,h,limits)
 
 
 i = 1
-pi = particles[i]
-x = pi.x
+particles_ref = particles[i]
+x = particles_ref.x
 search_range = 1
 radius2 = h^2
 offset = first(CartesianIndices(ntuple(i -> -search_range:search_range,N)))
+visited = falses(length(particles))
 
-
-function find_near!(spatial_index,particles,x,search_range,r2max,near_indices)
+function find_near!(spatial_index,particles,x,search_range,r2max,near_indices,visited)
     nfound = 0
 
-    @inline each_near(x,search_range,spatial_index) do j
+    @inline each_near(x,search_range,spatial_index,visited) do j
         pj = particles[j]
 	    rij = pj.x - x
 	    r2 = norm(rij)^2
@@ -86,7 +86,7 @@ end
 
 near_indices = zeros(Int,length(particles))
 r2max = config.h²;
-nfound = @btime find_near!(spatial_index,particles,x,search_range,r2max,near_indices)
+nfound = @btime find_near!(spatial_index,particles,x,search_range,r2max,near_indices,visited)
 
 near = near_indices[1:nfound]
 
@@ -95,7 +95,7 @@ near_ref = Int[]
 
 for j = 1:length(particles)
     pj = particles[j]
-	rij = pj.x - pi.x
+	rij = pj.x - particles_ref.x
 	r2 = norm(rij)^2
 
 	if r2 < config.h²
