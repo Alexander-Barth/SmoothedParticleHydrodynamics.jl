@@ -155,7 +155,9 @@ deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.SpatialHashing]]
-path = "/home/abarth/.julia/dev/SpatialHashing"
+git-tree-sha1 = "4e06ce11abb30452cfce9178c4f61e5330ff3447"
+repo-rev = "main"
+repo-url = "https://github.com/Alexander-Barth/SpatialHashing.jl"
 uuid = "e2e8a281-5b48-4fd6-b542-65e07fde0794"
 version = "0.1.0"
 
