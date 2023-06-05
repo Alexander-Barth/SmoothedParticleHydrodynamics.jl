@@ -77,6 +77,22 @@ end
 end
 
 
+
+function setup_hash(config,particles)
+    h = config.h
+    limits = config.limits
+    sz = unsafe_trunc.(Int,limits ./ h) .+ 1
+    table = zeros(Int,prod(sz)+1)
+    num_particles = zeros(Int,length(particles))
+    limits = Tuple(limits)
+    spatial_hash!(particles,h,limits,table,num_particles)
+    visited = zeros(Bool,length(num_particles))
+
+    spatial_index = (; table, num_particles, h, sz)
+
+    return spatial_index,visited
+end
+
 function step!(config,particles::AbstractVector{Particle{N,T}}) where {N,T}
     Δt = config.Δt
 
@@ -124,13 +140,13 @@ end
 end
 =#
 
-function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}},spatial_index) where {N,T}
+function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}},spatial_index,visited) where {N,T}
     #=Threads.@threads=# @inbounds for i in 1:length(particles)
 
         pi = particles[i]
 		rho = zero(T)
 
-        @inline each_near(pi.x,10*config.search_range,spatial_index) do j
+        @inline each_near(pi.x,10*config.search_range,spatial_index,visited) do j
 		#for j in 1:length(particles)
             pj = particles[j]
 			rij = pj.x - pi.x
@@ -146,7 +162,7 @@ function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}},
     end
 end
 
-function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial_index) where {N,T}
+function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial_index,visited) where {N,T}
     h = config.h
     g = config.g
     mass = config.mass
@@ -157,7 +173,7 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial
 	    ∇pressure = @SArray zeros(T,N)
 	    fvisc = @SArray zeros(T,N)
 
-        @inline each_near(pi.x,config.search_range,spatial_index) do j
+        @inline each_near(pi.x,config.search_range,spatial_index,visited) do j
 		#for j in 1:length(particles)
             pj = particles[j]
 			rij = pj.x - pi.x
@@ -180,18 +196,8 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial
     end
 end
 
-function update!(config,W_spiky,W_rho,particles)
-    h = config.h
-    limits = config.limits
-    sz = unsafe_trunc.(Int,limits ./ h) .+ 1
-    table = zeros(Int,prod(sz)+1)
-    num_particles = zeros(Int,length(particles))
-    limits = Tuple(limits)
-    spatial_hash!(particles,h,limits,table,num_particles)
-
-    spatial_index = (; table, num_particles, h, sz)
-
-	density_pressure(config,W_rho,particles,spatial_index)
-	forces!(config,W_spiky,particles,spatial_index)
+function update!(config,W_spiky,W_rho,particles,spatial_index,visited)
+	density_pressure(config,W_rho,particles,spatial_index,visited)
+	forces!(config,W_spiky,particles,spatial_index,visited)
 	step!(config,particles)
 end
