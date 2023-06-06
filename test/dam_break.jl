@@ -27,6 +27,10 @@ end
 
 @test particles[200].x[1] ≈ 274.05756f0
 
+@time update!(config,W_spiky,W_rho,particles,spatial_index,visited)
+
+#=
+
 # mutable struct
 # 3.433 ms
 # 3.432 ms
@@ -55,3 +59,4 @@ config,particles,W_spiky,W_rho = SmoothedParticleHydrodynamics.case_dam_break(
 
 # 1.38 seconds
 @time update!(config,W_spiky,W_rho,particles)
+=#

@@ -16,7 +16,8 @@ T = Float32
 config,particles,W_spiky,W_rho = SmoothedParticleHydrodynamics.case_dam_break(
     N,T,
     h = 16,
-    nparticles = 2000000,
+    #nparticles = 2000000,
+    nparticles = 2000,
     limits = (1200,900),
     g = (0, -10),
     Δt = 0.0007,
@@ -33,6 +34,11 @@ num_particles = zeros(Int,length(particles))
 limits = Tuple(limits)
 @time spatial_hash!(particles,h,limits,table,num_particles)
 @time spatial_hash!(particles,h,limits,table,num_particles)
+
+spatial_index = (; table, num_particles, config.h, sz)
+visited = zeros(Int,length(particles))
+
+@time update!(config,W_spiky,W_rho,particles,spatial_index,visited)
 
 #@code_warntype spatial_hash!(particles,h,limits,table,num_particles)
 

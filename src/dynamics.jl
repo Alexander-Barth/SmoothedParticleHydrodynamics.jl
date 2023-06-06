@@ -144,21 +144,35 @@ function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}},
     #=Threads.@threads=# @inbounds for i in 1:length(particles)
 
         pi = particles[i]
-		rho = zero(T)
+		rho = Ref(zero(T))
 
-        @inline each_near(pi.x,10*config.search_range,spatial_index,visited) do j
-		#for j in 1:length(particles)
+        @inline each_near(pi.x,config.search_range,spatial_index,visited) do j
             pj = particles[j]
 			rij = pj.x - pi.x
 			r2 = norm(rij)^2
 
-			if r2 < config.h²
+			if (r2 < config.h²)
 				# this computation is symmetric
-				rho += @fastmath config.mass * W(W_rho,r2)
+				rho[] += @fastmath config.mass * W(W_rho,r2)
             end
         end
-		p = config.gas_const * (rho - config.rest_density)
-        particles[i] = Particle(pi.x,pi.v,pi.f,rho,p)
+        #@show rho[]
+		p = config.gas_const * (rho[] - config.rest_density)
+        particles[i] = Particle(pi.x,pi.v,pi.f,rho[],p)
+
+	    # rho = zero(T)
+		# for j in 1:length(particles)
+        #     pj = particles[j]
+		# 	rij = pj.x - pi.x
+		# 	r2 = norm(rij)^2
+
+		# 	if r2 < config.h²
+		# 		# this computation is symmetric
+		# 		rho += @fastmath config.mass * W(W_rho,r2)
+        #     end
+        # end
+		# p = config.gas_const * (rho - config.rest_density)
+        # particles[i] = Particle(pi.x,pi.v,pi.f,rho,p)
     end
 end
 
@@ -170,11 +184,9 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial
 	#=Threads.@threads=# @inbounds for i in 1:length(particles)
         pi = particles[i]
 
-	    ∇pressure = @SArray zeros(T,N)
-	    fvisc = @SArray zeros(T,N)
-
+	    ∇pressure = Ref(@SArray zeros(T,N))
+	    fvisc = Ref(@SArray zeros(T,N))
         @inline each_near(pi.x,config.search_range,spatial_index,visited) do j
-		#for j in 1:length(particles)
             pj = particles[j]
 			rij = pj.x - pi.x
 			r = norm(rij)
@@ -183,20 +195,45 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial
 				# compute pressure force contribution
                 # Particle-Based Fluid Simulation for Interactive Applications
                 # Matthias Müller, et al. 2003, Eq 10.
-				#∇pressure += -config.mass * (pi.p + pj.p) / (2 * pj.rho) * ∇W(W_spiky,rij,r)
-				∇pressure += - pi.rho * config.mass * (pi.p/pi.rho^2 + pj.p/pj.rho^2) * ∇W(W_spiky,rij,r)
+				#∇pressure[] += -config.mass * (pi.p + pj.p) / (2 * pj.rho) * ∇W(W_spiky,rij,r)
+				∇pressure[] += - pi.rho * config.mass * (pi.p/pi.rho^2 + pj.p/pj.rho^2) * ∇W(W_spiky,rij,r)
 
 				# compute viscosity force contribution
-				fvisc += config.viscosity * config.mass * (pj.v - pi.v) / pj.rho * config.viscosity_lap * (h - r)
+				fvisc[] += config.viscosity * config.mass * (pj.v - pi.v) / pj.rho * config.viscosity_lap * (h - r)
             end
         end
 		fgrav = g * mass / pi.rho
-		f = ∇pressure + fvisc + fgrav
+		f = ∇pressure[] + fvisc[] + fgrav
+
+	    # ∇pressure = @SArray zeros(T,N)
+	    # fvisc = @SArray zeros(T,N)
+
+		# for j in 1:length(particles)
+        #     pj = particles[j]
+		# 	rij = pj.x - pi.x
+		# 	r = norm(rij)
+
+		# 	if (r < h) &&  (i != j)
+		# 		# compute pressure force contribution
+        #         # Particle-Based Fluid Simulation for Interactive Applications
+        #         # Matthias Müller, et al. 2003, Eq 10.
+		# 		#∇pressure += -config.mass * (pi.p + pj.p) / (2 * pj.rho) * ∇W(W_spiky,rij,r)
+		# 		∇pressure += - pi.rho * config.mass * (pi.p/pi.rho^2 + pj.p/pj.rho^2) * ∇W(W_spiky,rij,r)
+
+		# 		# compute viscosity force contribution
+		# 		fvisc += config.viscosity * config.mass * (pj.v - pi.v) / pj.rho * config.viscosity_lap * (h - r)
+        #     end
+        # end
+		# fgrav = g * mass / pi.rho
+		# f = ∇pressure + fvisc + fgrav
         particles[i] = Particle(pi.x,pi.v,f,pi.rho,pi.p)
     end
 end
 
 function update!(config,W_spiky,W_rho,particles,spatial_index,visited)
+    spatial_hash!(particles,config.h,config.limits,
+                  spatial_index.table,spatial_index.num_particles)
+
 	density_pressure(config,W_rho,particles,spatial_index,visited)
 	forces!(config,W_spiky,particles,spatial_index,visited)
 	step!(config,particles)
