@@ -9,3 +9,6 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SpatialHashing = "e2e8a281-5b48-4fd6-b542-65e07fde0794"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[compat]
+SpecialFunctions = "2"
