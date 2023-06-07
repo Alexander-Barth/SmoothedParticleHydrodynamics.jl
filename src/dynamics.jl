@@ -1,4 +1,5 @@
 using SpatialHashing: spatial_hash!, spatial_hash, each_near
+import SpatialHashing: spatial_hash!
 
 function Particle(x::SVector{N,T}) where {N,T}
     v = @SVector zeros(T,N)
@@ -230,8 +231,15 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial
     end
 end
 
+
+
+function spatial_hash!(particles::AbstractVector{<:Particle},h,limits,table,num_particles)
+    spatial_hash!(Location(particles),h,limits,table,num_particles)
+end
+
+
 function update!(config,W_spiky,W_rho,particles,spatial_index,visited)
-    spatial_hash!(particles,config.h,config.limits,
+    @inline spatial_hash!(particles,config.h,config.limits,
                   spatial_index.table,spatial_index.num_particles)
 
 	density_pressure(config,W_rho,particles,spatial_index,visited)

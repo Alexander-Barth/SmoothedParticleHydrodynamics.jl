@@ -1,5 +1,5 @@
 import SmoothedParticleHydrodynamics
-import SmoothedParticleHydrodynamics: forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W, Particle
+import SmoothedParticleHydrodynamics: forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W, Particle, Location
 using StableRNGs
 using Test
 import SmoothedParticleHydrodynamics: forces!, update!
@@ -48,14 +48,10 @@ visited = zeros(Int,length(particles))
 using StaticArrays
 import Base: size, getindex
 
-struct Location3{N,T,TC <: AbstractVector{Particle{N,T}}} <: AbstractVector{SVector{N,T}}
-    p::TC
-end
-@inline Base.size(l::Location3) = size(l.p)
-@inline Base.@propagate_inbounds Base.getindex(l::Location3,index) = l.p[index].x
 
 
-l = Location3(particles);
+l = @time Location(particles);
+
 
 spatial_index = spatial_hash(particles,h,limits)
 

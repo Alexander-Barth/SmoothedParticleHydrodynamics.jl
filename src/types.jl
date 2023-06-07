@@ -22,3 +22,14 @@ struct Particle{N,T}
     rho::T          # density
     p::T            # pressure
 end
+
+"""
+    Adapter type for SpatialHashing such that `loc[i]` returns `p.x[i]` where
+`loc = Location(p)`.
+"""
+struct Location{N,T,TC <: AbstractVector{Particle{N,T}}} <: AbstractVector{SVector{N,T}}
+    p::TC
+end
+
+@inline Base.size(l::Location) = size(l.p)
+@inline Base.@propagate_inbounds Base.getindex(l::Location,index) = l.p[index].x
