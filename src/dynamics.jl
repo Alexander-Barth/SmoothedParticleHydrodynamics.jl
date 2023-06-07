@@ -1,5 +1,6 @@
 using SpatialHashing: spatial_hash!, spatial_hash, each_near
-import SpatialHashing: spatial_hash!
+import SpatialHashing: spatial_hash!, update!
+using SpatialHashing
 
 function Particle(x::SVector{N,T}) where {N,T}
     v = @SVector zeros(T,N)
@@ -81,16 +82,9 @@ end
 
 function setup_hash(config,particles)
     h = config.h
-    limits = config.limits
-    sz = unsafe_trunc.(Int,limits ./ h) .+ 1
-    table = zeros(Int,prod(sz)+1)
-    num_particles = zeros(Int,length(particles))
-    limits = Tuple(limits)
-    spatial_hash!(particles,h,limits,table,num_particles)
-    visited = zeros(Bool,length(num_particles))
-
-    spatial_index = (; table, num_particles, h, sz)
-
+    limits = Tuple(config.limits)
+    spatial_index = SpatialHashing.spatial_hash(Location(particles),h,limits)
+    visited = zeros(Bool,length(particles))
     return spatial_index,visited
 end
 
@@ -233,14 +227,16 @@ end
 
 
 
-function spatial_hash!(particles::AbstractVector{<:Particle},h,limits,table,num_particles)
-    spatial_hash!(Location(particles),h,limits,table,num_particles)
+function spatial_hash!(particles::AbstractVector{<:Particle},h,limits,table,num_points)
+    spatial_hash!(Location(particles),h,limits,table,num_points)
 end
 
 
 function update!(config,W_spiky,W_rho,particles,spatial_index,visited)
-    @inline spatial_hash!(particles,config.h,config.limits,
-                  spatial_index.table,spatial_index.num_particles)
+    #@inline spatial_hash!(particles,config.h,config.limits,
+    #              spatial_index.table,spatial_index.num_points)
+
+    @inline SpatialHashing.update!(spatial_index,Location(particles))
 
 	density_pressure(config,W_rho,particles,spatial_index,visited)
 	forces!(config,W_spiky,particles,spatial_index,visited)

@@ -30,17 +30,17 @@ limits = config.limits
 
 sz = unsafe_trunc.(Int,limits ./ h) .+ 1
 table = zeros(Int,prod(sz)+1)
-num_particles = zeros(Int,length(particles))
+num_points = zeros(Int,length(particles))
 limits = Tuple(limits)
-@time spatial_hash!(particles,h,limits,table,num_particles)
-@time spatial_hash!(particles,h,limits,table,num_particles)
+@time spatial_hash!(particles,h,limits,table,num_points)
+@time spatial_hash!(particles,h,limits,table,num_points)
 
-spatial_index = (; table, num_particles, config.h, sz)
+spatial_index = (; table, num_points, config.h, sz, limits)
 visited = zeros(Int,length(particles))
 
 @time update!(config,W_spiky,W_rho,particles,spatial_index,visited)
 
-#@code_warntype spatial_hash!(particles,h,limits,table,num_particles)
+#@code_warntype spatial_hash!(particles,h,limits,table,num_points)
 
 
 
