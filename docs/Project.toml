@@ -1,3 +1,4 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 SmoothedParticleHydrodynamics = "0e947886-cfe6-4b54-a7de-1ae1ad1ec6c7"
+SpatialHashing = "e2e8a281-5b48-4fd6-b542-65e07fde0794"
