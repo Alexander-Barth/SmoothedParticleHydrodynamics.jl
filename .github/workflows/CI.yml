@@ -50,6 +50,7 @@ jobs:
           julia --project=docs/ -e '
             using Pkg
             Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.add(url="https://github.com/Alexander-Barth/SpatialHashing.jl")
             Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1
