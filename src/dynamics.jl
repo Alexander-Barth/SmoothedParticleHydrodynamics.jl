@@ -83,7 +83,10 @@ end
 function setup_hash(config,particles)
     h = config.h
     limits = Tuple(config.limits)
-    spatial_index = SpatialHashing.spatial_hash(Location(particles),h,limits)
+    sz = unsafe_trunc.(Int,limits ./ h) .+ 1
+    max_table = prod(sz)+1
+
+    spatial_index = SpatialHashing.spatial_hash(Location(particles),h,max_table)
     visited = zeros(Bool,length(particles))
     return spatial_index,visited
 end
@@ -224,13 +227,6 @@ function forces!(config,W_spiky,particles::AbstractVector{Particle{N,T}},spatial
         particles[i] = Particle(pi.x,pi.v,f,pi.rho,pi.p)
     end
 end
-
-
-
-function spatial_hash!(particles::AbstractVector{<:Particle},h,limits,table,num_points)
-    spatial_hash!(Location(particles),h,limits,table,num_points)
-end
-
 
 function update!(config,W_spiky,W_rho,particles,spatial_index,visited)
     #@inline spatial_hash!(particles,config.h,config.limits,
