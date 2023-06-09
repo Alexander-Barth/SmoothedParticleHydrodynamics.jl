@@ -51,17 +51,18 @@ surface_hypersphere(N) = 2*π^(N/2) / lanczos_gamma(N/2)
 Kernel in `n` dimension with characteristic radius `h` given by the following expression:
 
 ```math
-W(r,h) = c \\; (h - r)^3 \\mbox{for } r \\le h
+W(r,h) = c \\; (h - r)^3
 ```
 
-where \$r\$ is the radial distance and where the normalization coefficient \$c\$ is given by:
+for \$r \\le h\$ where \$r\$ is the radial distance and where the normalization coefficient \$c\$ is given by:
 
 ```math
-\\frac{1}{S_n c} = \\int_0^h\\left(h-r\\right)^3 r^{n-1}dr
+\\frac{1}{S_n \\, c} = \\int_0^h\\left(h-r\\right)^3 r^{n-1}dr
 =\\frac{h^{n+3}}{n}-\\frac{3h^{n+3}}{n+1}+\\frac{3h^{n+3}}{n+2}-\\frac{h^{n+3}}{n+3}
+```
 
 where \$S_n\$ is the surface of the unit n-sphere.
-```
+
 """
 function KernelSpiky(N,h::T) where T
     # https://www.symbolab.com/solver/definite-integral-calculator/%5Cint_%7B0%7D%5E%7Bh%7D%5Cleft(h-%20r%5Cright)%5E%7B3%7D%20r%5E%7Bn-1%7Ddr%20?or=input
@@ -74,6 +75,17 @@ end
 @inline ∇W(k::KernelSpiky,rij,r = norm(rij)) = k.coeff_grad * (k.h - r)^2 * rij / r
 
 
+# ```math
+# W(r,h) = c \\; (h - r)^3 \\mbox{for } r \\le h
+# ```
+
+# where \$r\$ is the radial distance and where the normalization coefficient \$c\$ is given by:
+
+# ```math
+# \\frac{1}{S_n c} = \\int_0^h\\left(h-r\\right)^3 r^{n-1}dr
+# =\\frac{h^{n+3}}{n}-\\frac{3h^{n+3}}{n+1}+\\frac{3h^{n+3}}{n+2}-\\frac{h^{n+3}}{n+3}
+
+# where \$S_n\$ is the surface of the unit n-sphere.
 
 
 #https://www.symbolab.com/solver/definite-integral-calculator/%5Cint_%7B0%7D%5E%7Bh%7D%5Cleft(h%5E%7B2%7D-%20r%5E%7B2%7D%5Cright)%5E%7B3%7D%20r%5E%7Bn-1%7Ddr%20?or=input
