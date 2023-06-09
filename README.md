@@ -7,6 +7,9 @@
 This package is a julia implementation of Smoothed-particle hydrodynamics.
 
 
+Online demo:
+https://alexander-barth.github.io/FluidSimDemo-WebAssembly/SmoothedParticleHydrodynamics/
+
 
 References:
 
