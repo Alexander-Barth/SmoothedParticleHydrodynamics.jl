@@ -24,8 +24,10 @@ struct Particle{N,T}
 end
 
 """
-    Adapter type for SpatialHashing such that `loc[i]` returns `p.x[i]` where
-`loc = Location(p)`.
+    loc = Location(p)
+
+Adapter type for SpatialHashing such that `loc[i]` returns `p.x[i]` where
+`p` is a list of particles.
 """
 struct Location{N,T,TC <: AbstractVector{Particle{N,T}}} <: AbstractVector{SVector{N,T}}
     p::TC
