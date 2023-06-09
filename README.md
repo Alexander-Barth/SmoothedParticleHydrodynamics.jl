@@ -7,3 +7,8 @@
 This package is a julia implementation of Smoothed-particle hydrodynamics.
 
 
+
+References:
+
+Müller M., Charypar D., Gross M.: Particlebased fluid simulation for interactive applications. In Proceedings of the ACM Siggraph/Eurographics Symposium on Computer Animation (2003), pp. 154–159, https://matthias-research.github.io/pages/publications/sca03.pdf
+

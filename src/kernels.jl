@@ -48,13 +48,13 @@ surface_hypersphere(N) = 2*π^(N/2) / lanczos_gamma(N/2)
     k = KernelSpiky(n,h)
 
 
-Kernel in $n$ dimension with characteristic radius `h` given by the following expression:
+Kernel in `n` dimension with characteristic radius `h` given by the following expression:
 
 ```math
-W(r,h) = c \\; (h - r)^3
+W(r,h) = c \\; (h - r)^3 \\mbox{for } r \\le h
 ```
 
-where \$r\$ is the radial distance and where the normalization coefficient $\c\$ is given by:
+where \$r\$ is the radial distance and where the normalization coefficient \$c\$ is given by:
 
 ```math
 \\frac{1}{S_n c} = \\int_0^h\\left(h-r\\right)^3 r^{n-1}dr
