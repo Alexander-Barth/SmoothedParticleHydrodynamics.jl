@@ -1,4 +1,4 @@
-using SpatialHashing: spatial_hash!, spatial_hash, each_near
+using SpatialHashing: spatial_hash!, spatial_hash, each_near, inrange!
 import SpatialHashing: spatial_hash!, update!
 using SpatialHashing
 
@@ -139,12 +139,15 @@ end
 =#
 
 function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}},spatial_index,visited) where {N,T}
+
+    search_range = config.search_range
+
     #=Threads.@threads=# @inbounds for i in 1:length(particles)
 
         pi = particles[i]
 		rho = Ref(zero(T))
 
-        @inline each_near(pi.x,config.search_range,spatial_index,visited) do j
+        @inline each_near(pi.x,search_range,spatial_index,visited) do j
             pj = particles[j]
 			rij = pj.x - pi.x
 			r2 = norm(rij)^2
@@ -154,12 +157,11 @@ function density_pressure(config,W_rho,particles::AbstractVector{Particle{N,T}},
 				rho[] += @fastmath config.mass * W(W_rho,r2)
             end
         end
-        #@show rho[]
 		p = config.gas_const * (rho[] - config.rest_density)
         particles[i] = Particle(pi.x,pi.v,pi.f,rho[],p)
 
 	    # rho = zero(T)
-		# for j in 1:length(particles)
+		# for j in inrange!(spatial_index,pi.x,search_range,visited)
         #     pj = particles[j]
 		# 	rij = pj.x - pi.x
 		# 	r2 = norm(rij)^2
