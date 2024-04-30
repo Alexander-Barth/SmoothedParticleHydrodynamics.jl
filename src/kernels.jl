@@ -1,48 +1,17 @@
-# TODO
-
-# https://en.wikipedia.org/wiki/Lanczos_approximation
-function lanczos_gamma(z::Float64)
-    g = 7
-    n = 9
-    p = (
-        0.99999999999980993,
-        676.5203681218851,
-        -1259.1392167224028,
-        771.32342877765313,
-        -176.61502916214059,
-        12.507343278686905,
-        -0.13857109526572012,
-        9.9843695780195716e-6,
-        1.5056327351493116e-7
-    )
-
-
-    if z < 0.5
-        y = π / (sin(π * z) * lanczos_gamma(1 - z))  # Reflection formula
+"""
+    S = surface_hypersphere(N)
+    Surface of a N-sphere. For example if N=3, its surface is 4π.
+"""
+function surface_hypersphere(N)
+    if N == 1
+        return 2.0
+    elseif N == 2
+        return 2*π
     else
-        z -= 1
-        x = sum(
-            ntuple(length(p)) do i
-                if i == 1
-                    @inbounds p[i]
-                else
-                    @inbounds p[i] / (z + i - 1)
-                end
-            end
-        )
-        t = z + g + 0.5
-        y = sqrt(2 * π) * t ^ (z + 0.5) * exp(-t) * x
+        return 2*π*surface_hypersphere(N-2)/(N-2)
     end
-    return y
 end
 
-surface_hypersphere(N) = 2*π^(N/2) / lanczos_gamma(N/2)
-
-#gamma(N) = 1 # 2D
-#surface_hypersphere(N) = 2*π^(N/2) / gamma(N/2)
-
-
-#KernelSpiky(N,h) = KernelSpiky{N,typeof(h)}(h,h^2,15/(π*h^6),-10 / (π * h^5))
 
 """
     k = KernelSpiky(n,h)

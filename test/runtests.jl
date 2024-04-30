@@ -23,8 +23,11 @@ end
     dr = 0.000001
     h = 2.
 
-    @test surface_hypersphere(2) ≈ 2*pi
-    @test surface_hypersphere(3) ≈ 4*pi
+    @test surface_hypersphere(2) ≈ 2*π
+    @test surface_hypersphere(3) ≈ 4*π
+    @test surface_hypersphere(4) ≈ 2*π^2
+    @test surface_hypersphere(5) ≈ 8*π^2/3
+    @test surface_hypersphere(6) ≈ π^3
 
     rij = [2.,3.,4.]
 
