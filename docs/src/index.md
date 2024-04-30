@@ -14,7 +14,7 @@ The fluid is represented by a set of discrete particles. Each particle is center
 ```
 
 where $\mathbf v_i$ is the velocity of the i-th particle.
-Each particle can have a property $A$
+Each particle can have a property $A$:
 
 ```math
 A(\mathbf r) = \int A(\mathbf r') W(|\mathbf r - \mathbf r'|,h) d^n r'
@@ -27,13 +27,13 @@ and it normalized:
 \int W(|\mathbf r - \mathbf r'|,h) d^n r' = 1
 ```
 
-and converges to a Dirac function if $h$ tends to zero.
+and converges to the Dirac function $\delta(\mathbf r - \mathbf r')$ if $h$ tends to zero.
 
 ```math
 \lim_{h \rightarrow 0} \int W(|\mathbf r - \mathbf r'|,h) d^n r' = \delta(\mathbf r - \mathbf r')
 ```
 
-For small $h$, we can therefore approximate the integral using the discrete sum:
+For small $h$ enought and sufficiently many particles, we can therefore approximate the integral using the discrete sum:
 
 ```math
 A(\mathbf r) = \sum_i V_i A_i W(|\mathbf r - \mathbf r_i|,h)
@@ -65,7 +65,7 @@ which can be seen as a discretized form of:
 \frac{d\rho}{dt} = -\rho \nabla \cdot v
 ```
 
-The pressure gradient is computed using the symmetric form:
+The pressure gradient is computed using the symmetric form by analogy of the evolution equation of density:
 
 ```math
 \nabla p(r_i) = \rho_i \sum_j m_j
