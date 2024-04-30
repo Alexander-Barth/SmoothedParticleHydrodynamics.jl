@@ -1,11 +1,11 @@
 using Test
 using LinearAlgebra
-import SmoothedParticleHydrodynamics: forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W, Particle
+import SmoothedParticleHydrodynamics: forces!, update!, surface_hypersphere, KernelSpiky,KernelPoly6, Kernel, W, ∇W, Particle, KernelViscosity
 
 
 function numerical_integration(k::Kernel{N},dr) where N
     integral = 0.
-        for r = 0:dr:k.h
+        for r = dr/2:dr:k.h
             r2 = r^2
             integral = integral + W(k,r2)*surface_hypersphere(N)*r^(N-1)*dr
         end
@@ -31,7 +31,7 @@ end
 
     rij = [2.,3.,4.]
 
-    for kernel in (KernelSpiky,KernelPoly6)
+    for kernel in (KernelSpiky,KernelPoly6,KernelViscosity)
         for N = 2:4
             local k
             k = kernel(N,h)

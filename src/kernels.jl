@@ -66,3 +66,32 @@ end
 
 @inline W(k::KernelPoly6,r2) =  k.coeff * (k.h² - r2)^3
 @inline ∇W(k::KernelPoly6,rij,r = norm(rij)) = k.coeff_grad * (k.h² - r^2)^2 * rij
+
+
+
+function KernelViscosity(N,h::T) where T
+    coeff = (N-1)*N*(N+2)*(N+3) / (6*h^N * surface_hypersphere(N))
+    coeff_grad = 1.0
+    KernelViscosity{N,T}(h,coeff,coeff_grad)
+end
+
+@inline function W(k::KernelViscosity,r2)
+    r = sqrt(r2)
+    rh = r/k.h
+
+    return k.coeff * (-0.5 * rh^3 + rh^2 + 0.5/rh - 1)
+end
+
+@inline function ∇W(k::KernelViscosity,rij,r = norm(rij))
+    rh = r/k.h
+
+    return k.coeff * (-1.5 * rh^2 + 2*rh - 0.5/(rh^2)) / k.h * rij/r
+end
+
+
+@inline function ∇²W(k::KernelViscosity,r2)
+    r = sqrt(r2)
+    rh = r/k.h
+    #TODO
+    return 0
+end

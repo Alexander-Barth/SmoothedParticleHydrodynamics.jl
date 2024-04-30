@@ -15,6 +15,13 @@ struct KernelPoly6{N,T} <: Kernel{N} where T <: Number
     coeff_grad::T
 end
 
+
+struct KernelViscosity{N,T} <: Kernel{N} where T <: Number
+    h::T
+    coeff::T
+    coeff_grad::T
+end
+
 struct Particle{N,T}
     x::SVector{N,T} # position
     v::SVector{N,T} # velocity
